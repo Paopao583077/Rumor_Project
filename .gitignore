@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Model files (large)
+*.pth
+*.pkl
+*.h5
+*.hdf5
+*.ckpt
+
+# Large data files
+data/images/
+data/exp/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (optional)
+学习路线指南.md
