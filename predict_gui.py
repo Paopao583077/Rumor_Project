@@ -11,7 +11,7 @@ import io
 from model import RumorDetector
 
 # ==================== 核心配置 ====================
-MODEL_PATH = 'best_model.pth'
+MODEL_PATH = 'best_model_attention.pth'
 IMAGE_SIZE = (200, 200)  # GUI中展示的图片大小
 
 # 1. 初始化模型和设备 (只运行一次)
@@ -132,7 +132,7 @@ class RumorDetectorGUI:
     def predict(self):
         """执行模型预测"""
         if not MODEL_LOADED:
-            messagebox.showerror("错误", "模型未加载成功，请检查 best_model.pth 文件。")
+            messagebox.showerror("错误", "模型未加载成功，请检查 best_model_attention.pth 文件。")
             return
 
         text = self.text_input.get("1.0", tk.END).strip()

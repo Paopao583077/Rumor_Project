@@ -8,7 +8,7 @@ import os
 
 
 class WeiboDataset(Dataset):
-    def __init__(self, csv_file, max_len=128, mode='train'):
+    def __init__(self, csv_file, max_len=128):
         self.data = pd.read_csv(csv_file)
         # 加载 BERT 分词器（这一步会自动下载字典，约几十KB）
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')

@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from dataset import WeiboDataset
 from model import RumorDetector
+from baseline_models import TextOnlyModel, ImageOnlyModel, ConcatModel
 
 
 def main():
@@ -10,28 +11,40 @@ def main():
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"🚀 正在使用计算设备: {DEVICE}")
 
-    # 2. 参数设置 (如果显存不够报错，就把 Batch Size 改小)
+    # 2. 参数设置
     BATCH_SIZE = 8
     LR = 2e-5
     EPOCHS = 3
 
+    # --- 核心切换区：你需要跑哪个模型，就取消哪一行的注释，并给它起个名字 ---
+    MODEL_TYPE = "text_only"
+    model = TextOnlyModel().to(DEVICE)
+
+    # MODEL_TYPE = "image_only"
+    # model = ImageOnlyModel().to(DEVICE)
+
+    # MODEL_TYPE = "concat"
+    # model = ConcatModel().to(DEVICE)
+
+    # MODEL_TYPE = "attention"
+    # model = RumorDetector().to(DEVICE)
+    # ------------------------------------------------------------------
+
     # 3. 准备数据
-    print("📦 正在加载数据...")
-    train_ds = WeiboDataset('./data/train.csv', mode='train')
-    val_ds = WeiboDataset('./data/test.csv', mode='val')
+    print(f"📦 正在加载数据，准备训练模型: {MODEL_TYPE}...")
+    train_ds = WeiboDataset('./data/train.csv')
+    val_ds = WeiboDataset('./data/test.csv')
 
     train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-    # 4. 初始化模型 (第一次运行会下载几百兆的模型文件，请耐心等待)
-    print("🧠 正在初始化模型 (首次运行需下载预训练参数)...")
-    model = RumorDetector().to(DEVICE)
-
+    # 4. 初始化模型
+    print(f"🧠 正在初始化 {MODEL_TYPE} 模型参数...")
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=LR)
 
     # 5. 循环训练
-    print("▶️ 开始训练！")
+    print(f"▶️ 开始训练 {MODEL_TYPE}！")
     for epoch in range(EPOCHS):
         model.train()
         total_loss = 0
@@ -57,8 +70,9 @@ def main():
         print(f"=== Epoch {epoch + 1} 完成 | 平均 Loss: {total_loss / len(train_loader):.4f} ===")
 
     # 6. 保存成果
-    torch.save(model.state_dict(), 'best_model.pth')
-    print("💾 训练完成，模型已保存为 best_model.pth")
+    save_name = f'best_model_{MODEL_TYPE}.pth'
+    torch.save(model.state_dict(), save_name)
+    print(f"💾 训练完成，模型已保存为 {save_name}")
 
 
 if __name__ == '__main__':

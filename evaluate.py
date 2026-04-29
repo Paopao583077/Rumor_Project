@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 from dataset import WeiboDataset
 from model import RumorDetector
+from baseline_models import TextOnlyModel, ImageOnlyModel, ConcatModel
 import numpy as np
 
 
@@ -12,15 +13,34 @@ def evaluate():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"🚀 开始评估，使用设备: {device}")
 
+    # --- 核心切换区：评估哪个模型就改这里 ---
+    MODEL_TYPE = "text_only"  # 可选: "text_only", "image_only", "concat", "attention"
+    
+    if MODEL_TYPE == "text_only":
+        model = TextOnlyModel()
+    elif MODEL_TYPE == "image_only":
+        model = ImageOnlyModel()
+    elif MODEL_TYPE == "concat":
+        model = ConcatModel()
+    else:
+        model = RumorDetector()
+        
+    model_path = f'best_model_{MODEL_TYPE}.pth'
+    # 兼容旧的文件名，如果不存在带后缀的，就尝试加载 best_model_attention.pth
+    import os
+    if not os.path.exists(model_path) and MODEL_TYPE == "attention":
+        model_path = 'best_model_attention.pth'
+        
+    print(f"🔍 正在加载模型权重: {model_path}")
+    # --------------------------------------
+
     # 2. 加载测试集
-    # 注意：确保你有 data/test.csv 文件 (我们之前的 preprocess.py 生成的)
-    test_ds = WeiboDataset('./data/test.csv', mode='test')
+    test_ds = WeiboDataset('./data/test.csv')
     test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
     print(f"📦 测试集包含 {len(test_ds)} 条数据")
 
     # 3. 加载模型
-    model = RumorDetector()
-    model.load_state_dict(torch.load('best_model.pth', map_location=device))
+    model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)
     model.eval()
 
